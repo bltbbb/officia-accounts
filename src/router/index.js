@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Login from '@/components/Login/Login'
+import Login from '@/views/Login/Login'
+import Layout from '@/views/Layout/Layout'
+import User from '@/views/User/User'
 
 Vue.use(Router)
 
@@ -10,6 +12,17 @@ export default new Router({
       path: '/',
       name: 'Login',
       component: Login
-    }
+    },
+    {
+      path: '/User',
+      component: Layout,
+      redirect: '/User/index',
+      children: [{
+        path: 'index',
+        component: User,
+        name: 'User',
+        meta: { title: 'User', icon: 'User', noCache: true }
+      }]
+    },
   ]
 })

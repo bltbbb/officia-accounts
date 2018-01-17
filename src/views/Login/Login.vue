@@ -30,7 +30,6 @@
   import Vue from 'vue'
   import VueCookie from 'vue-cookie'
   import lockr from 'lockr'
-  import axios from 'axios'
   import qs from 'qs'
   import md5 from 'js-md5';
 
@@ -68,32 +67,21 @@
         }
 
         this.showScreen = true;
-
-        //登录参数
-//          let loginParams = new URLSearchParams();
-//          loginParams.append('loginName', this.userName);
-//          loginParams.append('password', this.password);
         let data = {
           loginName:this.userName,
           password: md5(this.password)
         };
 
-        //测试接口 登录成功后将获取的token保存在cookie中
-        axios.post(this.$store.state.domain+'/authc/login', qs.stringify(data)).then((res)=>{
+        //登录成功后将获取的token保存在cookie中
+        this.$http.post('authc/login', qs.stringify(data)).then((res)=>{
           if(res.data.status === 0){
-            //设置cookie
-            this.$cookie.set('adoptToken', res.data.result.adoptToken, 1);
-
-            //获取token参数 请求菜单接口
-//                let tokenParams = new URLSearchParams();
-//                tokenParams.append('adoptToken', res.data.result.adoptToken);
+            this.$cookie.set('oa_adoptToken', res.data.result.adoptToken, 1);
             let data = {
               adoptToken: res.data.result.adoptToken
             };
 
             //请求
-            axios.post(this.$store.state.domain+'/getAuthMenus',qs.stringify(data)).then((res)=>{
-              this.$store.state.menuInfo = res.data;
+            this.$http.post('getAuthMenus',data).then((res)=>{
               this.toMenuArr(res.data)
               lockr.set("menuInfo",res.data);      //将数据存入localStorage 以便免登陆应用
               this.$router.push('/Content/Survey');    //跳转
