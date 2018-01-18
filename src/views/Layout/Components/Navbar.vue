@@ -1,6 +1,6 @@
 <template>
-    <div>
-      i'm navbar
+    <div class="navbar-container">
+      <h2>账号详情</h2>
     </div>
 </template>
 

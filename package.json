@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.17.1",
     "element-ui": "^2.0.11",
+    "exif-js": "^2.3.0",
     "js-md5": "^0.7.3",
     "lockr": "^0.8.4",
     "vue": "^2.5.2",
