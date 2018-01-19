@@ -37,8 +37,8 @@
   export default {
     data(){
       return {
-        userName: '',
-        password: '',
+        userName: 'admin',
+        password: 'admin',
         errorText: '用户名或密码错误',
         userEmpty: false,
         pwEmpty: false,
@@ -73,18 +73,15 @@
         };
 
         //登录成功后将获取的token保存在cookie中
-        this.$http.post('authc/login', qs.stringify(data)).then((res)=>{
+        this.$http.post('/authc/login', data).then((res)=>{
           if(res.data.status === 0){
             this.$cookie.set('oa_adoptToken', res.data.result.adoptToken, 1);
-            let data = {
-              adoptToken: res.data.result.adoptToken
-            };
+            let data = {};
 
             //请求
-            this.$http.post('getAuthMenus',data).then((res)=>{
-              this.toMenuArr(res.data)
+            this.$http.post('/getAuthMenus',data).then((res)=>{
               lockr.set("menuInfo",res.data);      //将数据存入localStorage 以便免登陆应用
-              this.$router.push('/Content/Survey');    //跳转
+              this.$router.push('/User/index');    //跳转
               this.showScreen = false;
               this.userName = '';
               this.password = '';

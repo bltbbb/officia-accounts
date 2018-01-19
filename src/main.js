@@ -7,8 +7,11 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './styles/index.scss' // global css
 import router from './router'
 import http from './axios/http'
+import VueCookie from 'vue-cookie'
+import './assets/css/iconfont.css'
 
 Vue.use(ElementUI)
+Vue.use(VueCookie);
 
 Vue.prototype.$http = http;
 

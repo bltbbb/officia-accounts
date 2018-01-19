@@ -8,7 +8,7 @@
 					'width': trueWidth*scale + 'px',
 					'height': trueHeight*scale + 'px',
 					'left': moveLeft + 'px',
-						'top': moveTop + 'px',
+					'top': moveTop + 'px',
 					'transform': 'rotateZ('+ rotate * 90 +'deg)'
 					}"
       >
@@ -222,7 +222,7 @@
       original: {
         type: Boolean,
         default: false
-      }
+      },
     },
     computed: {
       cropInfo () {
@@ -265,6 +265,12 @@
         this.showPreview()
       },
       rotate () {
+        this.showPreview()
+      },
+      moveLeft(){
+        this.showPreview()
+      },
+      moveTop() {
         this.showPreview()
       }
     },
@@ -358,9 +364,9 @@
             return false
           }
           this.x1=e.clientX;
-            this.y1=e.clientY;
-            this.dragLeft=this.$refs.croBox.offsetLeft;
-            this.dragTop=this.$refs.croBox.offsetTop;
+          this.y1=e.clientY;
+          this.dragLeft=this.$refs.croBox.offsetLeft;
+          this.dragTop=this.$refs.croBox.offsetTop;
           // 开始移动
           this.moveX = (e.clientX ? e.clientX : e.touches[0].clientX) - this.x
           this.moveY = (e.clientY ? e.clientY : e.touches[0].clientY) - this.y
@@ -462,26 +468,30 @@
             y=this.y2-this.y1;
         var bX = this.trueWidth * this.scale - this.autoCropWidth
         var bY = this.trueHeight * this.scale - this.autoCropHeight
-        this.moveLeft = this.dragLeft +x;
-        this.moveTop = this.dragTop +y;
-        if(this.moveLeft > 0){
+        if(this.dragLeft +x > 0){
           this.moveLeft= 0
+        }else {
+          this.moveLeft = this.dragLeft +x;
         }
-        if(this.moveLeft < -bX){
+        if(this.dragLeft +x < -bX){
           this.moveLeft = -bX
         }
-        if(this.moveTop > 0){
+        if(this.dragTop +y > 0){
           this.moveTop= 0
+        }else {
+          this.moveTop = this.dragTop +y;
         }
-        if(this.moveTop < -bY){
+        console.log(this.dragTop +y)
+        console.log(-bY)
+        if(this.dragTop +y < -bY){
           this.moveTop = -bY
         }
-        var nowX = e.clientX ? e.clientX : e.touches[0].clientX
-        var nowY = e.clientY ? e.clientY : e.touches[0].clientY
-        this.$nextTick(() => {
-          this.x = ~~(nowX - this.moveX)
-          this.y = ~~(nowY - this.moveY)
-        })
+//        var nowX = e.clientX ? e.clientX : e.touches[0].clientX
+//        var nowY = e.clientY ? e.clientY : e.touches[0].clientY
+//        this.$nextTick(() => {
+//          this.x = ~~(nowX - this.moveX)
+//          this.y = ~~(nowY - this.moveY)
+//        })
       },
       // 移动图片结束
       leaveImg (e) {
@@ -511,6 +521,7 @@
         if(this.moveLeft > 0){
           this.moveLeft= 0
         }
+        this.temScale = this.scale
         e.preventDefault()
         var change = e.deltaY || e.wheelDelta
         // 根据图片本身大小 决定每次改变大小的系数, 图片越大系数越小
@@ -522,12 +533,15 @@
         var num = coe * change
         //不能小于初始化尺寸
         if(num > 0){
-          if((this.scale -= Math.abs(num)) < this.minScale){
+            console.log((this.temScale -= Math.abs(num)) < this.minScale)
+          if((this.temScale -= Math.abs(num)) < this.minScale){
             this.scale = this.minScale
+            this.temScale = this.scale
             return
           }
         }
         num < 0 ? this.scale += Math.abs(num) : this.scale > Math.abs(num) ? this.scale -= Math.abs(num) : this.scale
+        this.temScale = this.scale
 
         var bX = this.trueWidth * this.scale - this.autoCropWidth
         var bY = this.trueHeight * this.scale - this.autoCropHeight

@@ -3,7 +3,7 @@
       <h1>坐标服务号平台</h1>
       <div class="right-user">
         <div class="img-wrapper">
-          <img src="../../../assets/img/user.png" alt="">
+          <img :src="img" alt="">
         </div>
         <div class="text-wrapper">
           <span>坐标活动</span>
@@ -13,7 +13,24 @@
 </template>
 
 <script>
-    export default {}
+    export default {
+        data(){
+            return {
+                img: '/static/img/avatar.3df55f3.jpg'
+            }
+        },
+        mounted(){
+          this.getUserInfo()
+        },
+        methods:{
+          getUserInfo(){
+            this.$http.get('/serviceInfoConfig').then( (res) => {
+              let data = res.data.result
+              data.picturePath ? this.option.img = data.picturePath : '/static/img/avatar.3df55f3.jpg'
+            })
+          }
+        }
+    }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
