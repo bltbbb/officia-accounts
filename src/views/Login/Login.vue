@@ -31,7 +31,8 @@
   import VueCookie from 'vue-cookie'
   import lockr from 'lockr'
   import qs from 'qs'
-  import md5 from 'js-md5';
+  import md5 from 'js-md5'
+  import { mapMutations,mapState  } from 'vuex'
 
   Vue.use(VueCookie);
   export default {
@@ -78,6 +79,9 @@
             this.$cookie.set('oa_adoptToken', res.data.result.adoptToken, 1);
             let data = {};
 
+//            获取头像存入store
+            this.getAvatar()
+
             //请求
             this.$http.post('/getAuthMenus',data).then((res)=>{
               lockr.set("menuInfo",res.data);      //将数据存入localStorage 以便免登陆应用
@@ -104,6 +108,12 @@
           this.showScreen = false;
         });
       },
+      getAvatar(){
+        this.$http.get('/serviceInfoConfig').then( (res) => {
+          let data = res.data.result
+          this.updateAvatar({avatar:data.picturePath})
+        })
+      },
       toMenuArr(arr){
         let arrTemp = [];
         arr.forEach((item)=>{
@@ -115,7 +125,8 @@
           }
         })
         lockr.set("menuArr",arrTemp);
-      }
+      },
+      ...mapMutations(['updateAvatar'])
     },
 //    created(){
 //      let _this = this;

@@ -1,0 +1,126 @@
+<template>
+  <div class="article-wrapper">
+    <div class="header">
+      <h1>文章共{{number}}条</h1>
+      <div class="search">
+        <el-input
+          style="width: 200px"
+          placeholder="请输入内容"
+          prefix-icon="el-icon-search"
+          v-model="search">
+        </el-input>
+        <el-dropdown @command="handleCommand" trigger="click" :show-timeout="0">
+          <el-button type="primary">新建</el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="a">新建图文消息</el-dropdown-item>
+            <el-dropdown-item command="b">新建文本消息</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+
+      </div>
+    </div>
+    <div class="table-list">
+      <el-table
+        :data="tableData"
+        style="width: 100%">
+        <el-table-column
+          label="内容"
+          width="500">
+          <template slot-scope="scope">
+            <img :src="scope.row.src" style="vertical-align:middle;" alt="">
+            <span style="display:inline-block;vertical-align:middle;padding-left: 10px;">{{scope.row.text}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="date"
+          label="更新时期">
+        </el-table-column>
+        <el-table-column
+          prop="status"
+          label="状态">
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          width="220">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="success"
+              @click="handlePreview(scope.$index, scope.row)">预览</el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="pagination-wrapper">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[10, 20, 50, 100]"
+          :page-size="100"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total">
+        </el-pagination>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+    export default {
+      data(){
+          return {
+            number: 0,
+            search: '',
+            currentPage:1,
+            total: 30,
+            tableData: [{
+              date: '2016-05-02',
+              src:'http://125.208.1.67:6003/file/download/af64824f-0293-4848-b666-6b50a8142605.png',
+              text:'123123',
+              status: '已发布',
+              address: '上海市普陀区金沙江路 1518 弄'
+            }]
+          }
+      },
+      methods: {
+        handleEdit(index, row) {
+          console.log(index, row);
+        },
+        handleDelete(index, row) {
+          console.log(index, row);
+        },
+        handleSizeChange(val) {
+          console.log(`每页 ${val} 条`);
+        },
+        handleCurrentChange(val) {
+          console.log(`当前页: ${val}`);
+        },
+        handleCommand(command) {
+          if(command == 'a'){
+              this.$router.push('/Article/NewArticle')
+          }
+        }
+      }
+    }
+</script>
+<style lang="scss" scoped>
+  .header {
+    overflow: hidden;
+    height:40px;
+    h1 {
+      float: left;
+      font-size: 20px;
+      line-height: 40px;
+    }
+    .search {
+      float: right;
+    }
+  }
+</style>

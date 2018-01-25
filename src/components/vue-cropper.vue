@@ -353,6 +353,7 @@
           this.$emit('imgLoad', 'error')
         }
         img.crossOrigin = '*'
+        img.crossOrigin = 'anonymous'
         img.src = this.img
       },
       // 当按下鼠标键
@@ -805,6 +806,7 @@
         let trueHeight = this.trueHeight
         let cropOffsertX = this.cropOffsertX
         let cropOffsertY = this.cropOffsertY
+        img.crossOrigin = "Anonymous"
         img.onload = () => {
           if (~~(this.cropW) !== 0) {
             let ctx = canvas.getContext('2d')

@@ -7,10 +7,12 @@
       background-color="#F1F1F1"
       text-color="#666"
       active-text-color="#459ffc">
-      <el-menu-item index="1">
-        <i class="el-icon-menu"></i>
-        <span slot="title">文章管理</span>
-      </el-menu-item>
+      <router-link to="/Article/index">
+        <el-menu-item index="1">
+          <i class="el-icon-menu"></i>
+          <span slot="title">文章管理</span>
+        </el-menu-item>
+      </router-link>
       <el-menu-item index="2">
         <i class="el-icon-setting"></i>
         <span slot="title">菜单设置</span>

@@ -17,6 +17,11 @@ axios.interceptors.request.use((config) => {
       config.data = qs.stringify(config.data);
     }
   }
+  if(config.method  === 'put'){
+    if(config.headers.shouldQs != false){
+      config.data = qs.stringify(config.data);
+    }
+  }
   return config;
 },(error) =>{
   this.$message("错误的传参");

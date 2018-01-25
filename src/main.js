@@ -8,6 +8,8 @@ import './styles/index.scss' // global css
 import router from './router'
 import http from './axios/http'
 import VueCookie from 'vue-cookie'
+import store from './store'
+import lockr from 'lockr'
 import './assets/css/iconfont.css'
 
 Vue.use(ElementUI)
@@ -21,6 +23,27 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  watch:{
+    "$route" : 'checkLogin'
+  },
+
+//进入页面时 验证是否登录
+  created() {
+    this.checkLogin();
+  },
+  methods: {
+    checkLogin(){
+      //检查是否存在Token
+      if (!this.$cookie.get('oa_adoptToken')) {
+        //如果没有登录状态则跳转到登录页 并移除localstorege
+        lockr.rm("menuInfo")
+        lockr.rm("avatar")
+        this.$cookie.delete('oa_adoptToken');
+        this.$router.push('/login');
+      }
+    }
+  }
 })

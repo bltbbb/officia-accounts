@@ -2,7 +2,7 @@
     <div class="user-wrapper">
       <div class="avatar">
         <div class="img-wrapper" @click="startEdite">
-          <img :src="option.img" alt="">
+          <img :src="this.avatar" alt="">
         </div>
       </div>
       <div class="avatar-dialog">
@@ -49,12 +49,39 @@
         </el-dialog>
       </div>
       <div class="userInfo">
-        <el-form ref="form" :model="form" label-width="60px">
+        <el-form ref="form" :model="form" label-width="120px" label-position="left">
           <el-form-item label="名称">
-            <el-input v-model="form.serviceName" style="width: 400px"></el-input>
+            <span v-if="!showNameInput">{{form.serviceName}}</span>
+            <el-input v-if="showNameInput" v-focus="{tag:'input',foc:'true'}" @blur="changeName" v-model="form.serviceName" style="width: 200px"></el-input>
+            <i class="el-icon-edit" style="cursor: pointer;padding-left: 10px;" @click="showName"></i>
+          </el-form-item>
+          <el-form-item label="坐标用户">
+            <span>{{form.cubeId}}</span>
+            <!--<el-input v-if="showNameInput" v-focus="{tag:'input',foc:'true'}" @blur="changeName" v-model="form.serviceName" style="width: 200px"></el-input>-->
+            <!--<i class="el-icon-edit" style="cursor: pointer;padding-left: 10px;" @click="showName"></i>-->
+          </el-form-item>
+          <el-form-item label="认证情况">
+            <span v-if="form.authentic == 1">已认证</span>
+            <span v-if="form.authentic == 2">未认证</span>
+            <!--<el-input v-if="showNameInput" v-focus="{tag:'input',foc:'true'}" @blur="changeName" v-model="form.serviceName" style="width: 200px"></el-input>-->
+            <!--<i class="el-icon-edit" style="cursor: pointer;padding-left: 10px;" @click="showName"></i>-->
+          </el-form-item>
+          <el-form-item label="地址">
+            <span>{{form.address}}</span>
+            <!--<el-input v-if="showNameInput" v-focus="{tag:'input',foc:'true'}" @blur="changeName" v-model="form.serviceName" style="width: 200px"></el-input>-->
+            <!--<i class="el-icon-edit" style="cursor: pointer;padding-left: 10px;" @click="showName"></i>-->
+          </el-form-item>
+          <el-form-item label="类型">
+            <span v-if="form.authentic == 1">服务号</span>
+            <span v-if="form.authentic == 2">订阅号</span>
+            <span v-if="form.authentic == 3">小程序</span>
+            <!--<el-input v-if="showNameInput" v-focus="{tag:'input',foc:'true'}" @blur="changeName" v-model="form.serviceName" style="width: 200px"></el-input>-->
+            <!--<i class="el-icon-edit" style="cursor: pointer;padding-left: 10px;" @click="showName"></i>-->
           </el-form-item>
           <el-form-item label="介绍">
-            <el-input v-model="form.describe" style="width: 400px"></el-input>
+            <span v-if="!showDesInput">{{form.describe}}</span>
+            <el-input type="textarea" v-if="showDesInput" v-focus="{cls:'el-textarea',tag:'textarea',foc:'true'}" @blur="changeDes" v-model="form.describe" style="width: 200px;font-family: 'Arial'"></el-input>
+            <i class="el-icon-edit" style="cursor: pointer;padding-left: 10px;" @click="showDes"></i>
           </el-form-item>
         </el-form>
       </div>
@@ -63,14 +90,18 @@
 
 <script>
     import vueCropper from '@/components/vue-cropper'
+    import { mapMutations, mapState  } from 'vuex'
+    import lockr from 'lockr'
     import '../../utils/spark-md5'
     export default {
         data(){
             return {
               dialogVisible: false,
               previews: {},
+              showNameInput:false,
+              showDesInput:false,
               option: {
-                img: '/static/img/avatar.3df55f3.jpg',
+                img: '',
                 size: 1,
                 full: false,
                 outputType: 'png',
@@ -88,13 +119,13 @@
         },
         mounted(){
           this.getUserInfo()
+          this.option.img = this.avatar
         },
         methods: {
           getUserInfo(){
             this.$http.get('/serviceInfoConfig').then( (res) => {
-                let data = res.data.result
-                this.form = data
-                data.picturePath ? this.option.img = data.picturePath : '/static/img/avatar.3df55f3.jpg'
+              let data = res.data.result
+              this.form = data
             })
           },
           startEdite(){
@@ -112,6 +143,7 @@
             }
             var reader = new FileReader()
             reader.onload = (e) => {
+                console.log(1)
               let data
               if (typeof e.target.result === 'object') {
                 // 把Array Buffer转化为blob 如果是base64不需要
@@ -146,7 +178,11 @@
                     'shouldQs':false                    
                   }
                 };
-                this.$http.post('/serviceInfoConfig/picture?id='+id+'&md5='+this.md5, formdata, config).then( (res) => {
+                this.$http.post('/serviceInfoConfig/picture?id='+id, formdata, config).then( (res) => {
+                    if(res.data.status == 0){
+                      this.updateAvatar({avatar:res.data.result.picturePath})
+                      this.dialogVisible = false
+                    }
                 })
               }
             })
@@ -160,11 +196,60 @@
           cancel(){
             this.dialogVisible = false
             this.option.img =  'https://o90cnn3g2.qnssl.com/0C3ABE8D05322EAC3120DDB11F9D1F72.png'
-          }
+          },
+          showName(){
+              this.showNameInput = true
+          },
+          showDes(){
+            this.showDesInput = true
+          },
+          changeName(){
+            let data = {
+              serviceName: this.form.serviceName
+            }
+            this.$http.put('/serviceInfoConfig',data).then( (res) => {
+              let data = res.data.result
+            })
+            this.showNameInput = false
+
+          },
+          changeDes(){
+            let data = {
+              describe: this.form.describe
+            }
+            this.$http.put('/serviceInfoConfig',data).then( (res) => {
+            })
+            this.showDesInput = false
+          },
+          ...mapMutations(['updateAvatar'])
         },
         components:{
           vueCropper
+        },
+        computed: mapState({
+          avatar: function(state){//箭头函数会有this的问题
+            let picPath = lockr.get('avatar')
+            if(state.userInfo.avatar == '' && picPath){
+              this.$store.commit('updateAvatar',{avatar:picPath})//同步操作
+            }
+            return state.userInfo.avatar
+          }
+        }),
+        directives:{
+          focus: {
+            inserted: function (el, option) {
+              var defClass = 'el-input', defTag = 'input';
+              var value = option.value || true;
+              if (typeof value === 'boolean')
+                value = { cls: defClass, tag: defTag, foc: value };
+              else
+                value = { cls: value.cls || defClass, tag: value.tag || defTag, foc: value.foc || false };
+              if (el.classList.contains(value.cls) && value.foc)
+                el.getElementsByTagName(value.tag)[0].focus();
+            }
+          }
         }
+
     }
 </script>
 
@@ -223,6 +308,12 @@
   .avatar-dialog {
     .el-dialog__body {
       padding-top: 0;
+    }
+  }
+  .userInfo {
+    padding-left: 20px;
+    .el-textarea__inner {
+      font-family: Arial;
     }
   }
 </style>

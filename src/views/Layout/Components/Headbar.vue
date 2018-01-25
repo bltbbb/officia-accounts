@@ -2,34 +2,60 @@
     <div class="headbar">
       <h1>坐标服务号平台</h1>
       <div class="right-user">
-        <div class="img-wrapper">
-          <img :src="img" alt="">
-        </div>
-        <div class="text-wrapper">
-          <span>坐标活动</span>
-        </div>
+        <el-dropdown @command="handleCommand" trigger="click" :show-timeout="0">
+          <div style="cursor: pointer;">
+            <div class="img-wrapper">
+              <img :src="this.avatar || '/static/img/avatar.3df55f3.jpg'" alt="">
+            </div>
+            <div class="text-wrapper">
+              <span>坐标活动<i class="el-icon-arrow-down el-icon--right"></i></span>
+            </div>
+          </div>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="detail">账号详情</el-dropdown-item>
+            <el-dropdown-item command="loginOut">退出登录</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+
       </div>
     </div>
 </template>
 
 <script>
+    import lockr from 'lockr'
+    import { mapState  } from 'vuex'
+
     export default {
         data(){
             return {
-                img: '/static/img/avatar.3df55f3.jpg'
+                img: ''
             }
         },
-        mounted(){
-          this.getUserInfo()
-        },
         methods:{
-          getUserInfo(){
-            this.$http.get('/serviceInfoConfig').then( (res) => {
-              let data = res.data.result
-              data.picturePath ? this.option.img = data.picturePath : '/static/img/avatar.3df55f3.jpg'
-            })
+          loginOut(){
+            lockr.rm("menuInfo")
+            lockr.rm("avatar")
+            this.$cookie.delete('oa_adoptToken');
+            this.$router.push('/login');
+          },
+          handleCommand(command) {
+            if(command === 'loginOut'){
+              this.loginOut()
+            }
+            if(command === 'detail'){
+              this.$router.push('/User/index')
+            }
           }
-        }
+        },
+        computed: mapState({
+          avatar: function(state){//箭头函数会有this的问题
+            let picPath = lockr.get('avatar')
+            if(state.userInfo.avatar == '' && picPath){
+              this.$store.commit('updateAvatar',{avatar:picPath})//同步操作
+            }
+            return state.userInfo.avatar
+          }
+        }),
     }
 </script>
 
@@ -67,6 +93,7 @@
        margin-right: 10px;
      }
      .text-wrapper {
+       color:#fff;
        top: 0;
        height: 60px;
        line-height: 60px;
