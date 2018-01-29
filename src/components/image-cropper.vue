@@ -442,6 +442,8 @@
         }
       },
       handleChange(e) {
+        console.log(this.width)
+        console.log(this.height)
         e.preventDefault();
         if (this.loading !== 1) {
           let files = e.target.files || e.dataTransfer.files;

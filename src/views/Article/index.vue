@@ -64,9 +64,9 @@
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size="100"
+          :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total">
+          :total="totalCount">
         </el-pagination>
       </div>
     </div>
@@ -79,7 +79,8 @@
             number: 0,
             search: '',
             currentPage:1,
-            total: 30,
+            pageSize:10,
+            totalCount: 30,
             tableData: [{
               date: '2016-05-02',
               src:'http://125.208.1.67:6003/file/download/af64824f-0293-4848-b666-6b50a8142605.png',
@@ -89,7 +90,19 @@
             }]
           }
       },
+      mounted(){
+        this.getAllArticle()
+      },
       methods: {
+        getAllArticle(){
+          let data = {
+            pageSize: this.pageSize,
+            currentPage: this.currentPage
+          }
+          this.$http.post('/serviceInfoArticles/page',data).then( (res) => {
+            this.totalCount = res.data.result.totalCount
+          })
+        },
         handleEdit(index, row) {
           console.log(index, row);
         },
