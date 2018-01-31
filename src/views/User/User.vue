@@ -175,7 +175,7 @@
                 let config = {
                   headers: {
                     'Content-Type': 'multipart/form-data',
-                    'shouldQs':false                    
+                    'shouldQs':false
                   }
                 };
                 this.$http.post('/serviceInfoConfig/picture?id='+id, formdata, config).then( (res) => {

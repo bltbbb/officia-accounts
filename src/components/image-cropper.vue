@@ -875,6 +875,7 @@
         }).then(
           // 上传成功
           function(resData) {
+            console.log(resData)
             if (that.value) {
               that.loading = 2;
               that.$emit('crop-upload-success', resData, field, ki);

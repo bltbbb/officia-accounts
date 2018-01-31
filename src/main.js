@@ -10,6 +10,7 @@ import http from './axios/http'
 import VueCookie from 'vue-cookie'
 import store from './store'
 import lockr from 'lockr'
+import './utils/dateFormat'
 import './assets/css/iconfont.css'
 
 Vue.use(ElementUI)

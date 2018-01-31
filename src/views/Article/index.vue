@@ -1,12 +1,14 @@
 <template>
   <div class="article-wrapper">
     <div class="header">
-      <h1>文章共{{number}}条</h1>
+      <h1>文章共{{totalCount}}条</h1>
       <div class="search">
         <el-input
+          clearable
           style="width: 200px"
           placeholder="请输入内容"
           prefix-icon="el-icon-search"
+          @input="searchArticle"
           v-model="search">
         </el-input>
         <el-dropdown @command="handleCommand" trigger="click" :show-timeout="0">
@@ -24,20 +26,28 @@
         :data="tableData"
         style="width: 100%">
         <el-table-column
-          label="内容"
-          width="500">
+          label="内容">
           <template slot-scope="scope">
-            <img :src="scope.row.src" style="vertical-align:middle;" alt="">
-            <span style="display:inline-block;vertical-align:middle;padding-left: 10px;">{{scope.row.text}}</span>
+            <img :src="scope.row.cover" style="vertical-align:middle;" alt="">
+            <span style="display:inline-block;vertical-align:middle;padding-left: 10px;" v-if="scope.row.target == 2 ">{{scope.row.title}}</span>
+            <span style="display:inline-block;vertical-align:middle;width: 500px;word-wrap: break-word;" v-if="scope.row.target == 3 ">{{scope.row.message}}</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="date"
-          label="更新时期">
+          label="更新时期"
+          width="200">
+          <template slot-scope="scope">
+            <span>{{(new Date(scope.row.updateTime)).Format("yyyy-M-d h:m:s")}}</span>
+          </template>
         </el-table-column>
         <el-table-column
-          prop="status"
-          label="状态">
+          label="状态"
+          width="100">
+          <template slot-scope="scope">
+            <span v-if="scope.row.publish == 1">已发布</span>
+            <span v-if="scope.row.publish == 2">未发布</span>
+            <span v-if="scope.row.publish == 3">定时发布</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="操作"
@@ -97,28 +107,54 @@
         getAllArticle(){
           let data = {
             pageSize: this.pageSize,
-            currentPage: this.currentPage
+            currentPage: this.currentPage,
+            title: this.search
           }
           this.$http.post('/serviceInfoArticles/page',data).then( (res) => {
-            this.totalCount = res.data.result.totalCount
+            if(res.data.status == 0) {
+              this.totalCount = Number(res.data.result.totalCount)
+              this.tableData = res.data.result.result
+            }
           })
         },
         handleEdit(index, row) {
-          console.log(index, row);
+          if(row.target == 2){
+            this.$router.push('/Article/NewArticle/Img/'+row.batchId)
+          }
+          if(row.target == 3){
+            this.$router.push('/Article/NewArticle/Text/'+row.batchId)
+          }
         },
         handleDelete(index, row) {
-          console.log(index, row);
+          this.$http.delete('/serviceInfoArticles',{
+              params:{
+                batchId: row.batchId
+              }
+          }).then( (res) => {
+            if(res.data.status == 0){
+              this.$message.success('删除成功')
+              this.getAllArticle()
+            }
+          })
         },
         handleSizeChange(val) {
-          console.log(`每页 ${val} 条`);
+          this.pageSize = val
+          this.getAllArticle()
         },
         handleCurrentChange(val) {
-          console.log(`当前页: ${val}`);
+          this.currentPage = val
+          this.getAllArticle()
         },
         handleCommand(command) {
           if(command == 'a'){
-              this.$router.push('/Article/NewArticle')
+              this.$router.push('/Article/NewArticle/Img/123')
           }
+          if(command == 'b'){
+            this.$router.push('/Article/NewArticle/Text/123')
+          }
+        },
+        searchArticle(data){
+          this.getAllArticle()
         }
       }
     }

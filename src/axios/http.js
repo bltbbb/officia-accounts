@@ -32,6 +32,9 @@ axios.interceptors.response.use((res) =>{
   if(res.status != '200'){
     return Promise.reject(res);
   }
+  if(res.data.status == 2){
+    return Promise.reject(res);
+  }
   return res;
 }, (error) => {
   console.log("网络异常");

@@ -66,7 +66,9 @@
    line-height: 60px;
    background: #3a3f51;
    color: #fff;
-   position: relative;
+   position: fixed;
+   width: 100%;
+   z-index:99;
    h1 {
      font-size: 30px;
      text-align: left;

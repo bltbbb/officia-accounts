@@ -10,5 +10,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
-
+  .navbar-container {
+    margin-top: 60px;
+  }
 </style>

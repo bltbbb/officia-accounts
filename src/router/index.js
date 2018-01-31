@@ -5,6 +5,7 @@ import Layout from '@/views/Layout/Layout'
 import User from '@/views/User/User'
 import Article from '@/views/Article'
 import NewArticle from '@/views/Article/NewArticle'
+import EditeMenu from '@/views/Menu/EditeMenu'
 
 Vue.use(Router)
 
@@ -46,11 +47,22 @@ export default new Router({
     {
       path: '/Article',
       component: Layout,
-      redirect: '/Article/NewArticle',
+      redirect: '/Article/NewArticle/:type/:id',
       children: [{
-        path: 'NewArticle',
+        path: 'NewArticle/:type/:id',
         component: NewArticle,
         name: 'NewArticle',
+        meta: { title: '文章管理>新建文章', icon: 'Article', noCache: true }
+      }]
+    },
+    {
+      path: '/Menu',
+      component: Layout,
+      redirect: '/Menu/EditeMenu',
+      children: [{
+        path: 'EditeMenu',
+        component: EditeMenu,
+        name: 'EditeMenu',
         meta: { title: '文章管理>新建文章', icon: 'Article', noCache: true }
       }]
     },
