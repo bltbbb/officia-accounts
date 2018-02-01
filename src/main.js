@@ -6,7 +6,7 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import './styles/index.scss' // global css
 import router from './router'
-import http from './axios/http'
+import axios from './axios/http'
 import VueCookie from 'vue-cookie'
 import store from './store'
 import lockr from 'lockr'
@@ -16,7 +16,7 @@ import './assets/css/iconfont.css'
 Vue.use(ElementUI)
 Vue.use(VueCookie);
 
-Vue.prototype.$http = http;
+Vue.prototype.$http = axios;
 
 Vue.config.productionTip = false
 

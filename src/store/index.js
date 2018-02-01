@@ -17,5 +17,9 @@ export default new Vuex.Store({
       state.userInfo.avatar = payload.avatar;
       lockr.set("avatar",payload.avatar);
     },
+    updateName(state, payload) {
+      state.userInfo.name = payload.name;
+      lockr.set("name",payload.name);
+    },
   }
 })

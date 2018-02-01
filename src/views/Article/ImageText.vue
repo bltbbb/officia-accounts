@@ -228,6 +228,7 @@
           }
         }).then( (res) => {
           this.form = res.data.result.result
+          this.count = this.form.length-1
         })
       },
       toggleShow(){

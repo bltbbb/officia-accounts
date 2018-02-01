@@ -30,7 +30,7 @@ export default new Router({
         path: 'index',
         component: User,
         name: 'User',
-        meta: { title: 'User', icon: 'User', noCache: true }
+        meta: { title: '账号详情', icon: 'User', noCache: true }
       }]
     },
     {
@@ -63,7 +63,7 @@ export default new Router({
         path: 'EditeMenu',
         component: EditeMenu,
         name: 'EditeMenu',
-        meta: { title: '文章管理>新建文章', icon: 'Article', noCache: true }
+        meta: { title: '自定义菜单', icon: 'Article', noCache: true }
       }]
     },
   ]

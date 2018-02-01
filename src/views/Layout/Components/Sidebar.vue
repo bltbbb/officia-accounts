@@ -7,7 +7,7 @@
       background-color="#F1F1F1"
       text-color="#666"
       active-text-color="#459ffc">
-      <router-link to="/Article/index">
+      <router-link :to="{ name: 'Article'}">
         <el-menu-item index="1">
           <i class="el-icon-menu"></i>
           <span slot="title">文章管理</span>

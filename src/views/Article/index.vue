@@ -30,7 +30,7 @@
           <template slot-scope="scope">
             <img :src="scope.row.cover" style="vertical-align:middle;" alt="">
             <span style="display:inline-block;vertical-align:middle;padding-left: 10px;" v-if="scope.row.target == 2 ">{{scope.row.title}}</span>
-            <span style="display:inline-block;vertical-align:middle;width: 500px;word-wrap: break-word;" v-if="scope.row.target == 3 ">{{scope.row.message}}</span>
+            <span style="display:inline-block;vertical-align:middle;width: 500px;word-wrap: break-word;overflow: hidden;" v-if="scope.row.target == 3 ">{{scope.row.message}}</span>
           </template>
         </el-table-column>
         <el-table-column

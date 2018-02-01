@@ -8,7 +8,7 @@
               <img :src="this.avatar || '/static/img/avatar.3df55f3.jpg'" alt="">
             </div>
             <div class="text-wrapper">
-              <span>坐标活动<i class="el-icon-arrow-down el-icon--right"></i></span>
+              <span>{{serviceName}}<i class="el-icon-arrow-down el-icon--right"></i></span>
             </div>
           </div>
           <el-dropdown-menu slot="dropdown">
@@ -48,12 +48,19 @@
           }
         },
         computed: mapState({
-          avatar: function(state){//箭头函数会有this的问题
+          avatar: function(state){ //箭头函数会有this的问题
             let picPath = lockr.get('avatar')
             if(state.userInfo.avatar == '' && picPath){
               this.$store.commit('updateAvatar',{avatar:picPath})//同步操作
             }
             return state.userInfo.avatar
+          },
+          serviceName: function(state){
+            let serviceName = lockr.get('name')
+            if(state.userInfo.name == '' && serviceName){
+              this.$store.commit('updateName',{name:serviceName})//同步操作
+            }
+            return state.userInfo.name
           }
         }),
     }

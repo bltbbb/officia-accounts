@@ -33,6 +33,7 @@ axios.interceptors.response.use((res) =>{
     return Promise.reject(res);
   }
   if(res.data.status == 2){
+    VueCookie.delete('oa_adoptToken')
     return Promise.reject(res);
   }
   return res;

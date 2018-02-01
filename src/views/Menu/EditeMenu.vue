@@ -2,43 +2,50 @@
     <div class="edite-menu">
       <div class="tip">
         <h4>菜单编辑中</h4>
-        <p>菜单未发布，请确认菜单编辑完成后点击“保存并发布”同步到手机。</p>
+        <p>菜单未发布，请确认菜单编辑完成后点击“发布”同步到手机。</p>
       </div>
       <div class="menu_preview_area">
         <div class="mobile_menu_preview">
           <div class="mobile_bd">
             <ul class="pre_menu_list">
-              <li v-for="(item,index) in form" :class="{active:(activeIndex == index) && activeMenuBoolean}" @click="activeMenu(index)">
-                <span v-if="item.menuName != ''">{{item.menuName}}</span>
-                <span v-if="item.menuName == ''">菜单名称</span>
-                <ul class="pre_menu_list_child" v-show="activeIndex == index" v-if="form.length != 0">
-                  <li v-for="(list,index1) in item['sub_menu']" :class="{noTopBorder:index1 == 0,active:(activeChildIndex == index1) && activeChilMenuBoolean}" @click.stop="activeChilMenu(index1);">
-                    <span v-if="list.menuName != ''">{{list.menuName}}</span>
-                    <span v-if="list.menuName == ''">子菜单名称</span>
-                  </li>
-                  <li class="addChildMenu" :class="{noTopBorder:item['sub_menu'].length == 0}" @click.stop="addChildMenu(index)" v-if="item['sub_menu'].length <= 4">
-                    <span><i class="el-icon-plus"></i></span>
-                  </li>
-                </ul>
-              </li>
-              <li class="addMenu" @click="addMenu" v-if="form.length <= 2">
-                <span><i class="el-icon-plus"></i></span>
-                <span v-if="form.length == 0">添加菜单</span>
-              </li>
+              <draggable v-model="form" :options="{disabled:!isSorting,animation:150}" @start="drag=true" @end="drag=true" @update="datadragEnd">
+                <li v-for="(item,index) in form" :key="index" class="pre_menu_list_li" :class="{active:(activeIndex == index) && activeMenuBoolean}" @click="activeMenu(index)">
+                  <span v-if="item.menuName != ''">{{item.menuName}}</span>
+                  <span v-if="item.menuName == ''">菜单名称</span>
+                  <ul class="pre_menu_list_child" v-show="activeIndex == index" v-if="form.length != 0" :class="{noBorder: isSorting && item['sub_menu'].length == 0 }">
+                    <draggable v-model="item['sub_menu']" :options="{group:'people'}" @start="drag=true" @end="drag=false" @update="datadragEnd2">
+                      <li v-for="(list,index1) in item['sub_menu']" :class="{noTopBorder:index1 == 0,active:(activeChildIndex == index1) && activeChilMenuBoolean}" @click.stop="activeChilMenu(index1);">
+                        <span v-if="list.menuName != ''">{{list.menuName}}</span>
+                        <span v-if="list.menuName == ''">子菜单名称</span>
+                      </li>
+                      <li class="addChildMenu" :class="{noTopBorder:item['sub_menu'].length == 0}" @click.stop="addChildMenu(index)" v-if="item['sub_menu'].length <= 4 && !isSorting">
+                        <span><i class="el-icon-plus"></i></span>
+                      </li>
+                    </draggable>
+                  </ul>
+                </li>
+                <li class="addMenu pre_menu_list_li" @click="addMenu" v-if="form.length <= 2 && !isSorting">
+                  <span><i class="el-icon-plus"></i></span>
+                  <span v-if="form.length == 0">添加菜单</span>
+                </li>
+              </draggable>
             </ul>
           </div>
         </div>
       </div>
       <div class="menu_form_area">
-        <div class="js_rightBox">
+        <div class="js_none" v-if="isSorting">
+          请通过拖拽左边的菜单进行排序
+        </div>
+        <div class="js_rightBox" v-if="!isSorting">
           <div class="editor_inner">
             <div class="editor_header">
               <span style="float: left;">{{menuForm.name ? menuForm.name : menuTopName}}</span>
               <span style="float: right;color: #337ab7;cursor: pointer;" @click="deleteMenu">删除菜单</span>
             </div>
             <div class="editor_body">
-              <el-form ref="form" :model="menuForm" label-width="80px" label-position="left">
-                <el-form-item label="菜单名称">
+              <el-form ref="form" :model="menuForm" label-width="80px" label-position="left" :rules="rules">
+                <el-form-item label="菜单名称" prop="name">
                   <el-input style="width: 300px" v-model="menuForm.name" placeholder="请输入菜单名称" @blur="saveMenuName"></el-input>
                   <br>
                   <span style="color: #8d8d8d;">字数不超过4个汉字或8个字母</span>
@@ -50,48 +57,111 @@
                 </el-form-item>
                 <div class="url-wrapper" v-if="!isCatalog">
                   <span style="color: #8d8d8d;">阅读者点击该子菜单会跳到以下链接</span>
-                  <el-form-item label="页面地址">
-                    <el-input style="width: 300px" v-model="menuForm.url" placeholder="请输入跳转链接地址" @blur="saveUrlPath"></el-input>
+                  <el-form-item label="页面地址" prop="urlPath">
+                    <el-input style="width: 300px" v-model="menuForm.urlPath" placeholder="请输入跳转链接地址" @blur="saveUrlPath"></el-input>
                     <br>
                   </el-form-item>
                 </div>
               </el-form>
             </div>
+
           </div>
         </div>
+        <div class="editor_footer">
+          <el-button @click="saveEditeForm">保存</el-button>
+        </div>
+      </div>
+      <div class="btn-wrapper">
+        <el-button type="success" class="sort_btn" @click="sortMenu" v-if="!isSorting">菜单排序</el-button>
+        <el-button type="success" class="sort_btn" @click="sortMenuDone" v-if="isSorting">完成</el-button>
+        <el-button type="primary" class="save_btn" v-if="!isSorting" @click="pushMenu">发布</el-button>
+        <el-button class="preview_btn" v-if="!isSorting" @click="previewPhone">预览</el-button>
+      </div>
+      <div class="preview_phone" v-if="phonePre">
+        <div class="phone_bg">
+          <ul class="pre_menu_list">
+            <li v-for="(item,index) in form" :key="index" class="pre_menu_list_li" @click="preActiveIndex = index">
+              <span v-if="item.menuName != ''">{{item.menuName}}</span>
+              <span v-if="item.menuName == ''">菜单名称</span>
+              <ul class="pre_menu_list_child" v-show="preActiveIndex == index" v-if="item['sub_menu'].length != 0" :class="{noBorder: isSorting && item['sub_menu'].length == 0 }">
+                <li v-for="(list,index1) in item['sub_menu']" :class="{noTopBorder:index1 == 0,active:(activeChildIndex == index1) && activeChilMenuBoolean}">
+                  <span v-if="list.menuName != ''">{{list.menuName}}</span>
+                  <span v-if="list.menuName == ''">子菜单名称</span>
+                </li>
+                <i class="arrow arrow_in"></i>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <el-button  class="preOutBtn" @click="phonePre = false">退出预览</el-button>
       </div>
     </div>
 </template>
 
 <script>
+    import draggable from 'vuedraggable'
+
     export default {
       data(){
+          var validatename = (rule, value, callback) => {
+              let len = this.getByteLen(value)
+              if (value === '') {
+                callback(new Error('请输入菜单名'));
+              } else if (len > 8) {
+                callback(new Error('不能大于8个字符'));
+              } else {
+                callback();
+              }
+          };
           return {
             form:[],
             menuForm:{
               name:'',
               type: '跳转网页',
-              url:''
+              urlPath:''
             },
             activeIndex:0,
             activeChildIndex:0,
             activeChilMenuBoolean:false,
             activeMenuBoolean:true,
             isCatalog: true,
-            menuTopName: ''
+            menuTopName: '',
+            isSorting: false,
+            phonePre: false,
+            preActiveIndex: 0,
+            rules:{
+              name: [
+                { validator: validatename, trigger: 'blur',required: true },
+              ],
+              urlPath: [
+                { required: true, message: '请输入文章地址', trigger: 'blur' },
+                { type:"url", message: '请输入正确的链接', trigger: 'blur' }
+              ],
+            }
           }
       },
       mounted(){
         this.init()
       },
+      components: {
+        draggable,
+      },
       methods:{
         init(){
-            this.getMenu()
+          this.getMenu()
+
         },
         getMenu(){
           this.$http.get('/serviceInfoMenus').then( (res) => {
             this.form = res.data.result
-            this.menuForm.name = this.form[0].menuName
+            if(this.form[0].menuName != ''){
+              this.menuForm.name = this.form[0].menuName
+            }else {
+              this.menuTopName = '菜单名称'
+            }
+            if(this.form[0]['sub_menu'].length == 0 ){
+                this.isCatalog = false
+            }
           })
         },
         addMenu(){
@@ -112,35 +182,36 @@
           let data = {
             menuName : '',
             urlPath  : '',
-            menuType  :1,
+            menuType  :2,
             target :2,
           }
+
+          this.form[index].menuType = 1
+
+          this.isCatalog = true
 
           this.form[index]['sub_menu'].unshift(data)
 
           this.pushFrom()
         },
-        saveMenuName(){
+        saveEditeForm(){
           if(this.getByteLen(this.menuForm.name) > 8){
-            this.$message.error('请按规则填写菜单名')
+            this.$message.error('字数不超过4个汉字或8个字母')
             return
           }
           if(this.activeMenuBoolean){
             this.form[this.activeIndex].menuName = this.menuForm.name
-          }
-          if(this.activeChilMenuBoolean){
-            this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].menuName = this.menuForm.name
-          }
-          this.pushFrom()
-        },
-        saveUrlPath(){
-          if(this.activeMenuBoolean){
             this.form[this.activeIndex].urlPath = this.menuForm.urlPath
           }
           if(this.activeChilMenuBoolean){
+            this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].menuName = this.menuForm.name
             this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].urlPath = this.menuForm.urlPath
           }
           this.pushFrom()
+        },
+        saveMenuName(){
+        },
+        saveUrlPath(){
         },
         activeMenu(index){
           this.menuTopName = '菜单名称'
@@ -151,6 +222,8 @@
           this.menuForm.urlPath = this.form[this.activeIndex].urlPath
           if(this.form[this.activeIndex]['sub_menu'].length > 0){
               this.isCatalog = true
+          }else {
+            this.isCatalog = false
           }
         },
         activeChilMenu(index){
@@ -170,8 +243,10 @@
             this.form[this.activeIndex]['sub_menu'].splice(this.activeChildIndex,1)
           }
           this.pushFrom()
-          this.menuForm.name = this.form[this.activeIndex].menuName
-          this.menuForm.urlPath = this.form[this.activeIndex].urlPath
+          if(this.form.length != 0){
+            this.menuForm.name = this.form[this.activeIndex].menuName
+            this.menuForm.urlPath = this.form[this.activeIndex].urlPath
+          }
           this.menuForm.name = this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].menuName
           this.menuForm.urlPath = this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].urlPath
         },
@@ -183,6 +258,29 @@
             }
           };
           this.$http.put('/serviceInfoMenus',this.form,config).then( (res) => {})
+        },
+        sortMenu(){
+          this.isSorting = true
+        },
+        sortMenuDone(){
+          this.isSorting = false
+          this.pushFrom()
+        },
+        datadragEnd (evt) {
+          this.activeIndex = evt.newIndex
+        },
+        datadragEnd2 (evt){
+          this.activeChildIndex = evt.newIndex
+        },
+        previewPhone(){
+          this.phonePre = true
+        },
+        pushMenu(){
+          this.$http.post('/serviceInfoMenus/release').then( (res) => {
+              if(res.data.status == 0){
+                  this.$message.success('发布成功')
+              }
+          })
         },
         //字符长度
         getByteLen(val) {
@@ -248,35 +346,41 @@
             background-repeat: no-repeat;
             padding-left: 43px;
             height: 50px;
-            display: flex;
-            &>li {
-              flex:1;
-              line-height: 50px;
-              text-align: center;
-              font-size:12px;
-              border-left: 1px solid #e7e7eb;
-              position: relative;
-              &.active {
-                border: 1px solid #44b549;
-                color: #44b549;
-              }
-              .pre_menu_list_child {
-                border: 1px solid #d0d0d0;
-                width: 100%;
-                position: absolute;
-                left:0;
-                bottom: 60px;
-                li {
-                  display: inline-block;
+            &>div {
+              display: flex;
+              .pre_menu_list_li {
+                flex:1;
+                line-height: 50px;
+                text-align: center;
+                font-size:12px;
+                border-left: 1px solid #e7e7eb;
+                position: relative;
+                &.active {
+                  border: 1px solid #44b549;
+                  color: #44b549;
+                  height: 50px;
+                }
+                .pre_menu_list_child {
+                  border: 1px solid #d0d0d0;
                   width: 100%;
-                  color: #616161;
-                  border-top: 1px solid #d0d0d0;
-                  &.noTopBorder {
-                    border-top: none;
+                  position: absolute;
+                  left:0;
+                  bottom: 60px;
+                  li {
+                    display: inline-block;
+                    width: 100%;
+                    color: #616161;
+                    border-top: 1px solid #d0d0d0;
+                    &.noTopBorder {
+                      border-top: none;
+                    }
+                    &.active {
+                      border: 1px solid #44b549;
+                      color: #44b549;
+                    }
                   }
-                  &.active {
-                    border: 1px solid #44b549;
-                    color: #44b549;
+                  &.noBorder {
+                    border: none;
                   }
                 }
               }
@@ -293,6 +397,7 @@
       width: 65%;
       min-height:580px;
       background: #F4F5F9;
+      position: relative;
       .js_rightBox {
         padding-left: 12px;
         position: relative;
@@ -314,6 +419,118 @@
             }
           }
         }
+      }
+      .editor_footer {
+        position: absolute;
+        bottom: 20px;
+        text-align: center;
+        width: 100%;
+      }
+      .js_none {
+        text-align: center;
+        padding-top: 200px;
+        color: #8d8d8d;
+      }
+    }
+    .btn-wrapper {
+      float: left;
+      margin-top: 30px;
+      .sort_btn {
+        margin-left: 120px;
+      }
+      .save_btn {
+        margin-left: 170px;
+      }
+    }
+    .preview_phone {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      overflow: auto;
+      background: rgba(0,0,0,0.5);
+      z-index:2001;
+      .phone_bg {
+        width: 320px;
+        height: 640px;
+        position: relative;
+        left: 50%;
+        top: 10%;
+        margin-left: -160px;
+        background: transparent url('../../assets/img/iphone-x.png') no-repeat 0 0;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        z-index:2002;
+        .pre_menu_list{
+          position: absolute;
+          bottom: 43px;
+          left: 60px;
+          right: 21px;
+          border-top: 1px solid #e7e7eb;
+          background: #FAFAFA;
+          display: flex;
+          height: 43px;
+          .pre_menu_list_li {
+            flex:1;
+            line-height: 43px;
+            text-align: center;
+            font-size:12px;
+            border-left: 1px solid #e7e7eb;
+            position: relative;
+            &.active {
+              border: 1px solid #44b549;
+              color: #44b549;
+              height: 50px;
+            }
+            .pre_menu_list_child {
+              border: 1px solid #d0d0d0;
+              width: 100%;
+              position: absolute;
+              left:0;
+              bottom: 55px;
+              background: #FAFAFA;
+              li {
+                display: inline-block;
+                width: 100%;
+                color: #616161;
+                border-top: 1px solid #d0d0d0;
+                &.noTopBorder {
+                  border-top: none;
+                }
+                &.active {
+                  border: 1px solid #44b549;
+                  color: #44b549;
+                }
+              }
+              &.noBorder {
+                border: none;
+              }
+            }
+            .arrow_in {
+              bottom: -5px;
+              display: inline-block;
+              width: 0;
+              height: 0;
+              border-width: 6px;
+              border-style: dashed;
+              border-color: transparent;
+              border-bottom-width: 0;
+              border-top-color: #fafafa;
+              border-top-style: solid;
+            }
+            .arrow {
+              position: absolute;
+              left: 50%;
+              margin-left: -6px;
+            }
+          }
+        }
+      }
+      .preOutBtn {
+        position: absolute;
+        bottom: 120px;
+        left: 46.5%;
       }
     }
   }

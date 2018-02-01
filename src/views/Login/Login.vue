@@ -112,6 +112,7 @@
         this.$http.get('/serviceInfoConfig').then( (res) => {
           let data = res.data.result
           this.updateAvatar({avatar:data.picturePath})
+          this.updateName({name:data.serviceName})
         })
       },
       toMenuArr(arr){
@@ -126,7 +127,7 @@
         })
         lockr.set("menuArr",arrTemp);
       },
-      ...mapMutations(['updateAvatar'])
+      ...mapMutations(['updateAvatar','updateName'])
     },
 //    created(){
 //      let _this = this;

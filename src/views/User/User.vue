@@ -208,7 +208,10 @@
               serviceName: this.form.serviceName
             }
             this.$http.put('/serviceInfoConfig',data).then( (res) => {
-              let data = res.data.result
+                if(res.data.status == 0){
+                  let data = res.data.result
+                  this.updateName({name:this.form.serviceName})
+                }
             })
             this.showNameInput = false
 
@@ -221,7 +224,7 @@
             })
             this.showDesInput = false
           },
-          ...mapMutations(['updateAvatar'])
+          ...mapMutations(['updateAvatar','updateName'])
         },
         components:{
           vueCropper
@@ -233,6 +236,13 @@
               this.$store.commit('updateAvatar',{avatar:picPath})//同步操作
             }
             return state.userInfo.avatar
+          },
+          vuexServiceName: function(state){
+            let serviceName = lockr.get('name')
+            if(state.userInfo.name == '' && serviceName){
+              this.$store.commit('updateName',{name:serviceName})//同步操作
+            }
+            return state.userInfo.name
           }
         }),
         directives:{
