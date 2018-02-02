@@ -11,6 +11,9 @@
 
 <script>
     import { Navbar, Sidebar, AppMain,Headbar } from './components'
+    import lockr from 'lockr'
+    import { mapMutations, mapState  } from 'vuex'
+
     export default {
       name: 'layout',
       components: {
@@ -19,8 +22,14 @@
         Sidebar,
         AppMain,
       },
-      mounted(){
-        console.log(this.$route)
+      methods:{
+        ...mapMutations(['updateNavName'])
+      },
+      watch: {
+        $route (to, from) {
+          //检测router 存储meta到store
+          this.updateNavName({navName:to.meta.title})
+        }
       }
     }
 </script>

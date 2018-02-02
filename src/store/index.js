@@ -8,7 +8,8 @@ export default new Vuex.Store({
   state: {
     userInfo: {
       avatar:'',
-      name:''
+      name:'',
+      navName:''
     }
   },
   mutations: {
@@ -20,6 +21,10 @@ export default new Vuex.Store({
     updateName(state, payload) {
       state.userInfo.name = payload.name;
       lockr.set("name",payload.name);
+    },
+    updateNavName(state, payload) {
+      state.userInfo.navName = payload.navName;
+      lockr.set("navName",payload.navName);
     },
   }
 })

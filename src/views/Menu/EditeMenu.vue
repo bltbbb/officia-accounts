@@ -67,12 +67,12 @@
 
           </div>
         </div>
-        <div class="editor_footer">
-          <el-button @click="saveEditeForm">保存</el-button>
+        <div class="editor_footer"  v-if="!isSorting">
+          <el-button @click="validateForm">保存</el-button>
         </div>
       </div>
       <div class="btn-wrapper">
-        <el-button type="success" class="sort_btn" @click="sortMenu" v-if="!isSorting">菜单排序</el-button>
+        <el-button type="success" class="sort_btn" @click="sortMenu" v-if="!isSorting" :disabled="cantSort">菜单排序</el-button>
         <el-button type="success" class="sort_btn" @click="sortMenuDone" v-if="isSorting">完成</el-button>
         <el-button type="primary" class="save_btn" v-if="!isSorting" @click="pushMenu">发布</el-button>
         <el-button class="preview_btn" v-if="!isSorting" @click="previewPhone">预览</el-button>
@@ -128,6 +128,7 @@
             menuTopName: '',
             isSorting: false,
             phonePre: false,
+            cantSort: false,
             preActiveIndex: 0,
             rules:{
               name: [
@@ -175,7 +176,7 @@
 
           this.form.push(data)
 
-          this.pushFrom()
+          this.pushForm()
 
         },
         addChildMenu(index){
@@ -190,9 +191,20 @@
 
           this.isCatalog = true
 
-          this.form[index]['sub_menu'].unshift(data)
+          this.form[index]['sub_menu'].push(data)
 
-          this.pushFrom()
+          this.pushForm()
+        },
+        validateForm(){
+          this.$refs['form'].validate((valid) => {
+            console.log(valid)
+            if (valid) {
+              this.saveEditeForm()
+            } else {
+              this.$message.error('请填写完整后再进行保存')
+              return false;
+            }
+          });
         },
         saveEditeForm(){
           if(this.getByteLen(this.menuForm.name) > 8){
@@ -207,7 +219,7 @@
             this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].menuName = this.menuForm.name
             this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].urlPath = this.menuForm.urlPath
           }
-          this.pushFrom()
+          this.pushForm(this.$message.success('保存成功'))
         },
         saveMenuName(){
         },
@@ -242,7 +254,7 @@
           if(this.activeChilMenuBoolean){
             this.form[this.activeIndex]['sub_menu'].splice(this.activeChildIndex,1)
           }
-          this.pushFrom()
+          this.pushForm()
           if(this.form.length != 0){
             this.menuForm.name = this.form[this.activeIndex].menuName
             this.menuForm.urlPath = this.form[this.activeIndex].urlPath
@@ -250,21 +262,27 @@
           this.menuForm.name = this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].menuName
           this.menuForm.urlPath = this.form[this.activeIndex]['sub_menu'][this.activeChildIndex].urlPath
         },
-        pushFrom(){
+        pushForm(callback){
           let config = {
             headers: {
               'Content-Type': 'application/json',
               'shouldQs':false
             }
           };
-          this.$http.put('/serviceInfoMenus',this.form,config).then( (res) => {})
+          this.$http.put('/serviceInfoMenus',this.form,config).then( (res) => {
+              if(res.data.status == 0){
+                  if(callback){
+                    callback()
+                  }
+              }
+          })
         },
         sortMenu(){
           this.isSorting = true
         },
         sortMenuDone(){
           this.isSorting = false
-          this.pushFrom()
+          this.pushForm()
         },
         datadragEnd (evt) {
           this.activeIndex = evt.newIndex
@@ -276,6 +294,44 @@
           this.phonePre = true
         },
         pushMenu(){
+          for (var i = 0;i<this.form.length;i++){
+              if(this.form[i].menuName == ''){
+                let tempName = this.menuForm.name
+                let tempUrl = this.menuForm.urlPath
+                this.activeIndex = i
+                this.activeChilMenuBoolean = false
+                this.activeMenuBoolean = true
+                this.activeMenu(i)
+                this.menuForm.name = tempName
+                this.menuForm.urlPath = tempUrl
+                this.$refs['form'].validate((valid) => {
+                  if (!valid) {
+                    this.$message.error('请将相关项填写完整后再进行发布')
+                    return false;
+                  }
+                });
+              }else {
+                  for (var j = 0;j<this.form[i]['sub_menu'].length;j++){
+                      if(this.form[i]['sub_menu'][j].menuName == ''){
+                          let tempName = this.menuForm.name
+                          let tempUrl = this.menuForm.urlPath
+                          this.activeIndex = i
+                          this.activeChildIndex = j
+                          this.activeChilMenuBoolean = true
+                          this.activeMenuBoolean = false
+                          this.activeChilMenu(j)
+                          this.menuForm.name = tempName
+                          this.menuForm.urlPath = tempUrl
+                          this.$refs['form'].validate((valid) => {
+                            if (!valid) {
+                              this.$message.error('请将相关项填写完整后再进行发布')
+                              return false;
+                            }
+                          });
+                      }
+                  }
+              }
+          }
           this.$http.post('/serviceInfoMenus/release').then( (res) => {
               if(res.data.status == 0){
                   this.$message.success('发布成功')
@@ -323,7 +379,7 @@
     }
     .menu_preview_area {
       float: left;
-      margin-right: 12px;
+      margin-right: 20px;
       position: relative;
       .mobile_menu_preview {
         width: 320px;
@@ -391,13 +447,10 @@
     }
     .menu_form_area {
       padding: 10px 30px;
-      display: table-cell;
-      vertical-align: top;
-      float: right;
-      width: 65%;
       min-height:580px;
       background: #F4F5F9;
       position: relative;
+      overflow: hidden;
       .js_rightBox {
         padding-left: 12px;
         position: relative;
