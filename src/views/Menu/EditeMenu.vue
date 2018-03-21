@@ -150,7 +150,6 @@
       methods:{
         init(){
           this.getMenu()
-
         },
         getMenu(){
           this.$http.get('/serviceInfoMenus').then( (res) => {
@@ -197,7 +196,6 @@
         },
         validateForm(){
           this.$refs['form'].validate((valid) => {
-            console.log(valid)
             if (valid) {
               this.saveEditeForm()
             } else {
